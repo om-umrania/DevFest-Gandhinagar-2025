@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+google-cloud-storage
+sqlalchemy>=2.0
+python-frontmatter
+python-dateutil
