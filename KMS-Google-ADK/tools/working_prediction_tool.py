@@ -1,5 +1,5 @@
 """
-Simple Prediction Layer Tool for KMS-Google-ADK MVP
+Working Prediction Layer Tool for KMS-Google-ADK MVP
 Basic query classification and retrieval planning.
 """
 
@@ -16,7 +16,7 @@ class RetrievalPlan:
     filters: Dict[str, Any]
 
 
-class PredictionLayerTool:
+class WorkingPredictionTool:
     """Simple tool for query analysis and retrieval planning."""
     
     def __init__(self):
@@ -72,9 +72,9 @@ class PredictionLayerTool:
     
     def rerank_candidates(
         self, 
-        candidates: List[Dict[str, Any]], 
+        candidates: List[Any], 
         query: str
-    ) -> List[Dict[str, Any]]:
+    ) -> List[Any]:
         """
         Simple reranking of candidates.
         
@@ -87,63 +87,25 @@ class PredictionLayerTool:
         """
         query_words = set(query.lower().split())
         
-        # Convert all candidates to dictionaries with rerank scores
-        result_list = []
         for candidate in candidates:
-            # Extract data from different object types
-            if hasattr(candidate, 'metadata'):
-                # SearchResult object with metadata
-                title = candidate.metadata.get('title', '').lower()
-                content = getattr(candidate, 'snippet', '').lower()
-                original_score = getattr(candidate, 'score', 0)
-            elif hasattr(candidate, 'title'):
-                # SearchResult object without metadata
-                title = getattr(candidate, 'title', '').lower()
-                content = getattr(candidate, 'content', '').lower()
-                original_score = getattr(candidate, 'score', 0)
-            else:
-                # Dictionary object
-                title = candidate.get("title", "").lower()
-                content = candidate.get("content", "").lower()
-                original_score = candidate.get("score", 0)
+            # Always use getattr for SearchResult objects
+            title = getattr(candidate, 'title', '').lower()
+            content = getattr(candidate, 'content', '').lower()
+            original_score = getattr(candidate, 'score', 0)
             
             # Count word matches
             title_matches = sum(1 for word in query_words if word in title)
             content_matches = sum(1 for word in query_words if word in content)
             
-            # Calculate rerank score
+            # Simple rerank score
             rerank_score = (
                 original_score * 0.7 +  # Original score
                 title_matches * 0.2 +  # Title matches
                 content_matches * 0.1   # Content matches
             )
             
-            # Create result dictionary
-            if hasattr(candidate, 'metadata'):
-                result_dict = {
-                    "note_id": getattr(candidate, 'note_id', ''),
-                    "path": getattr(candidate, 'path', ''),
-                    "title": candidate.metadata.get('title', ''),
-                    "content": getattr(candidate, 'snippet', ''),
-                    "score": original_score,
-                    "rerank_score": rerank_score,
-                    "metadata": getattr(candidate, 'metadata', {})
-                }
-            elif hasattr(candidate, 'title'):
-                result_dict = {
-                    "note_id": getattr(candidate, 'note_id', ''),
-                    "path": getattr(candidate, 'path', ''),
-                    "title": getattr(candidate, 'title', ''),
-                    "content": getattr(candidate, 'content', ''),
-                    "score": original_score,
-                    "rerank_score": rerank_score,
-                    "metadata": {}
-                }
-            else:
-                result_dict = dict(candidate)
-                result_dict["rerank_score"] = rerank_score
-            
-            result_list.append(result_dict)
+            # Add rerank score to candidate
+            candidate.rerank_score = rerank_score
         
         # Sort by rerank score
-        return sorted(result_list, key=lambda x: x.get("rerank_score", 0), reverse=True)
+        return sorted(candidates, key=lambda x: getattr(x, 'rerank_score', 0), reverse=True)

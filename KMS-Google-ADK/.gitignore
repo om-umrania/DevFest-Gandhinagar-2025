@@ -22,16 +22,22 @@ wheels/
 MANIFEST
 
 # Virtual environments
-.venv/
 venv/
-ENV/
+.venv/
 env/
-.env
+.env/
+ENV/
+env.bak/
+venv.bak/
 
 # Database files
 *.db
 *.sqlite
 *.sqlite3
+
+# Logs
+*.log
+logs/
 
 # IDE
 .vscode/
@@ -49,72 +55,21 @@ env/
 ehthumbs.db
 Thumbs.db
 
-# Logs
-*.log
-logs/
-
 # Temporary files
 *.tmp
 *.temp
 temp/
 tmp/
 
-# Test files
-test_*.py
-*_test.py
-tests/
+# Google Cloud SDK (if downloaded)
+google-cloud-sdk/
+google-cloud-cli-*.tar.gz
 
-# Coverage
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
+# Sample data and reports (optional - uncomment if you don't want to track these)
+# sample_notes/
+# sample_data_test_report.txt
+# notes/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
+# Server logs
+server.log
+nohup.out

@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 
 from fastapi import FastAPI, Query
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from app.index_store import (
@@ -96,6 +97,351 @@ def _startup():
     migrate()
 
 # ---------- Routes ----------
+@app.get("/", response_class=HTMLResponse)
+def landing_page():
+    """Landing page with search interface."""
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>KMS Google ADK - Knowledge Management System</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+            
+            .header {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: white;
+                padding: 40px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+                font-weight: 700;
+            }
+            
+            .header p {
+                font-size: 1.2rem;
+                opacity: 0.9;
+            }
+            
+            .search-section {
+                padding: 40px;
+            }
+            
+            .search-form {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+            
+            .search-input {
+                flex: 1;
+                padding: 15px 20px;
+                border: 2px solid #e5e7eb;
+                border-radius: 12px;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+            }
+            
+            .search-input:focus {
+                outline: none;
+                border-color: #4f46e5;
+                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            }
+            
+            .search-btn {
+                padding: 15px 30px;
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .search-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+            }
+            
+            .filters {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+            
+            .filter-group {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .filter-group label {
+                font-weight: 600;
+                margin-bottom: 5px;
+                color: #374151;
+            }
+            
+            .filter-group input, .filter-group select {
+                padding: 10px;
+                border: 2px solid #e5e7eb;
+                border-radius: 8px;
+                font-size: 0.9rem;
+            }
+            
+            .results-section {
+                margin-top: 30px;
+            }
+            
+            .result-item {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 15px;
+                transition: all 0.3s ease;
+            }
+            
+            .result-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            }
+            
+            .result-title {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: #1f2937;
+                margin-bottom: 8px;
+            }
+            
+            .result-path {
+                color: #6b7280;
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+            
+            .result-snippet {
+                color: #4b5563;
+                line-height: 1.6;
+                margin-bottom: 10px;
+            }
+            
+            .result-score {
+                display: inline-block;
+                background: #dbeafe;
+                color: #1e40af;
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-size: 0.8rem;
+                font-weight: 600;
+            }
+            
+            .loading {
+                text-align: center;
+                padding: 40px;
+                color: #6b7280;
+            }
+            
+            .error {
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                color: #dc2626;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 20px 0;
+            }
+            
+            .stats {
+                background: #f0f9ff;
+                border: 1px solid #bae6fd;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .stats h3 {
+                color: #0369a1;
+                margin-bottom: 10px;
+            }
+            
+            .quick-search {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .quick-search-btn {
+                background: #f3f4f6;
+                border: 1px solid #d1d5db;
+                color: #374151;
+                padding: 8px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+            }
+            
+            .quick-search-btn:hover {
+                background: #4f46e5;
+                color: white;
+                border-color: #4f46e5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🔍 KMS Google ADK</h1>
+                <p>Knowledge Management System - Search across 30+ technical documents</p>
+            </div>
+            
+            <div class="search-section">
+                <form class="search-form" onsubmit="searchDocuments(event)">
+                    <input type="text" id="searchQuery" class="search-input" placeholder="Search for machine learning, Docker, web development, security..." required>
+                    <button type="submit" class="search-btn">Search</button>
+                </form>
+                
+                <div class="quick-search">
+                    <span style="font-weight: 600; margin-right: 10px;">Quick searches:</span>
+                    <button class="quick-search-btn" onclick="quickSearch('machine learning')">Machine Learning</button>
+                    <button class="quick-search-btn" onclick="quickSearch('docker containers')">Docker</button>
+                    <button class="quick-search-btn" onclick="quickSearch('web development')">Web Dev</button>
+                    <button class="quick-search-btn" onclick="quickSearch('security best practices')">Security</button>
+                    <button class="quick-search-btn" onclick="quickSearch('kubernetes orchestration')">Kubernetes</button>
+                    <button class="quick-search-btn" onclick="quickSearch('python programming')">Python</button>
+                </div>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="tags">Tags (comma-separated)</label>
+                        <input type="text" id="tags" placeholder="e.g., ai, docker, security">
+                    </div>
+                    <div class="filter-group">
+                        <label for="sortBy">Sort by</label>
+                        <select id="sortBy">
+                            <option value="score">Relevance</option>
+                            <option value="date_desc">Date (Newest)</option>
+                            <option value="date_asc">Date (Oldest)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="maxResults">Max Results</label>
+                        <select id="maxResults">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="results"></div>
+            </div>
+        </div>
+        
+        <script>
+            function quickSearch(query) {
+                document.getElementById('searchQuery').value = query;
+                searchDocuments(event);
+            }
+            
+            async function searchDocuments(event) {
+                event.preventDefault();
+                
+                const query = document.getElementById('searchQuery').value;
+                const tags = document.getElementById('tags').value;
+                const sortBy = document.getElementById('sortBy').value;
+                const maxResults = document.getElementById('maxResults').value;
+                
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<div class="loading">🔍 Searching...</div>';
+                
+                try {
+                    let url = `/search?q=${encodeURIComponent(query)}&k=${maxResults}&sort=${sortBy}`;
+                    if (tags) {
+                        url += `&tags=${encodeURIComponent(tags)}`;
+                    }
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    displayResults(data);
+                } catch (error) {
+                    resultsDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                }
+            }
+            
+            function displayResults(data) {
+                const resultsDiv = document.getElementById('results');
+                
+                if (!data.results || data.results.length === 0) {
+                    resultsDiv.innerHTML = '<div class="error">No results found. Try a different search term.</div>';
+                    return;
+                }
+                
+                let html = `
+                    <div class="stats">
+                        <h3>📊 Search Results</h3>
+                        <p>Found <strong>${data.total_candidates}</strong> documents matching "${data.query}"</p>
+                        <p>Showing ${data.results.length} results</p>
+                    </div>
+                `;
+                
+                data.results.forEach((result, index) => {
+                    const title = result.heading || 'Untitled';
+                    const path = result.path.replace('gs://kms-test-bucket-devfest/', '');
+                    const snippet = result.snippet || 'No preview available';
+                    const score = (result.score || 0).toFixed(3);
+                    
+                    html += `
+                        <div class="result-item">
+                            <div class="result-title">${title}</div>
+                            <div class="result-path">📄 ${path}</div>
+                            <div class="result-snippet">${snippet}</div>
+                            <div class="result-score">Score: ${score}</div>
+                        </div>
+                    `;
+                });
+                
+                resultsDiv.innerHTML = html;
+            }
+            
+            // Load some initial results on page load
+            window.addEventListener('load', function() {
+                searchDocuments({preventDefault: () => {}});
+            });
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
 @app.get("/search", response_model=SearchResponse)
 def search(
     q: str = Query(..., min_length=1),
