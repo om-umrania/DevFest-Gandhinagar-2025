@@ -1,0 +1,99 @@
+# Graph Database Schema for Obsidian KMS
+# Neo4j/TypeDB node and relationship definitions
+
+nodes:
+  Note:
+    properties:
+      - id: string (unique)
+      - title: string
+      - path: string (unique)
+      - content: text
+      - frontmatter: json
+      - created_at: datetime
+      - updated_at: datetime
+      - checksum: string
+      - word_count: integer
+      - reading_time: integer
+    indexes:
+      - path
+      - title
+      - created_at
+
+  Entity:
+    properties:
+      - id: string (unique)
+      - name: string
+      - type: string (PERSON, ORGANIZATION, CONCEPT, LOCATION, etc.)
+      - description: text
+      - aliases: array<string>
+      - confidence: float
+      - created_at: datetime
+    indexes:
+      - name
+      - type
+
+  Section:
+    properties:
+      - id: string (unique)
+      - note_id: string
+      - heading: string
+      - content: text
+      - level: integer
+      - start_line: integer
+      - end_line: integer
+      - embedding: vector
+      - created_at: datetime
+    indexes:
+      - note_id
+      - heading
+
+relationships:
+  LINKS_TO:
+    from: Note
+    to: Note
+    properties:
+      - confidence: float
+      - rationale: text
+      - source: string (AUTO, MANUAL, SUGGESTED)
+      - created_at: datetime
+      - last_verified: datetime
+
+  MENTIONS:
+    from: Note
+    to: Entity
+    properties:
+      - confidence: float
+      - context: text
+      - start_pos: integer
+      - end_pos: integer
+      - created_at: datetime
+
+  CONTAINS:
+    from: Note
+    to: Section
+    properties:
+      - order: integer
+
+  DERIVED_FROM:
+    from: Note
+    to: Note
+    properties:
+      - derivation_type: string (SUMMARY, EXCERPT, REFERENCE)
+      - confidence: float
+      - created_at: datetime
+
+  SIMILAR_TO:
+    from: Note
+    to: Note
+    properties:
+      - similarity_score: float
+      - method: string (EMBEDDING, GRAPH, HYBRID)
+      - created_at: datetime
+
+  RELATED_TO:
+    from: Entity
+    to: Entity
+    properties:
+      - relationship_type: string (WORKS_FOR, LOCATED_IN, PART_OF, etc.)
+      - confidence: float
+      - created_at: datetime

@@ -1,0 +1,66 @@
+# Markdown Frontmatter Schema for Obsidian KMS
+# Standardized frontmatter structure for notes
+
+required_fields:
+  - title: string
+  - created_at: datetime
+  - updated_at: datetime
+
+optional_fields:
+  - description: string
+  - tags: array<string>
+  - aliases: array<string>
+  - status: enum[draft, published, archived]
+  - priority: enum[low, medium, high, urgent]
+  - category: string
+  - author: string
+  - source: string
+  - url: string
+  - reading_time: integer
+  - word_count: integer
+  - last_reviewed: datetime
+  - review_frequency: enum[daily, weekly, monthly, quarterly, yearly]
+  - confidence: float (0.0-1.0)
+  - quality_score: float (0.0-1.0)
+  - difficulty: enum[beginner, intermediate, advanced]
+  - language: string (ISO 639-1)
+  - version: string
+  - dependencies: array<string> (note IDs)
+  - related_notes: array<string> (note IDs)
+  - external_links: array<object>
+    - url: string
+    - title: string
+    - description: string
+    - accessed_at: datetime
+  - custom_fields: object (key-value pairs)
+
+# Example frontmatter:
+# ---
+# title: "Machine Learning Fundamentals"
+# description: "Core concepts and algorithms in machine learning"
+# tags: ["machine-learning", "ai", "tutorial"]
+# aliases: ["ML Basics", "ML 101"]
+# status: "published"
+# priority: "high"
+# category: "Technology"
+# author: "John Doe"
+# created_at: "2024-01-15T10:30:00Z"
+# updated_at: "2024-01-20T14:45:00Z"
+# reading_time: 15
+# word_count: 2500
+# confidence: 0.9
+# quality_score: 0.85
+# difficulty: "intermediate"
+# language: "en"
+# version: "1.2"
+# dependencies: ["note-123", "note-456"]
+# related_notes: ["note-789", "note-012"]
+# external_links:
+#   - url: "https://example.com/ml-paper"
+#     title: "Original ML Paper"
+#     description: "The foundational paper on this topic"
+#     accessed_at: "2024-01-15T10:30:00Z"
+# custom_fields:
+#   department: "Engineering"
+#   project: "AI Initiative"
+# ---
